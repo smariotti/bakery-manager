@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Record Sale{% endblock %}
+{% block content %}
+<h1 class="mb-4">Record Sale — {{ batch.product.name }}</h1>
+<div class="card" style="max-width:500px">
+  <div class="card-body">
+    <p><strong>Available:</strong> <span class="text-success fw-bold">{{ batch.quantity_available }}</span></p>
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label">Quantity Sold</label>
+        <input type="number" name="quantity_sold" class="form-control" required min="1" max="{{ batch.quantity_available }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Sales Channel</label>
+        <select name="channel" class="form-select">
+          {% for val, label in channels %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="mb-3"><label class="form-label">Notes</label><textarea name="notes" class="form-control" rows="2"></textarea></div>
+      <button type="submit" class="btn btn-success">Record Sale</button>
+      <a href="{% url 'production:dashboard' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

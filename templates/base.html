@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Bakery Manager{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body { background: #fdf8f0; }
+    .navbar { background: #5c3317 !important; }
+    .navbar-brand, .nav-link { color: #fff !important; }
+    .nav-link:hover { color: #f5c97a !important; }
+    .card { border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 12px; }
+    .badge-status { font-size: 0.85rem; padding: 0.4em 0.8em; border-radius: 20px; }
+    .btn-primary { background: #5c3317; border-color: #5c3317; }
+    .btn-primary:hover { background: #7a4522; border-color: #7a4522; }
+    h1, h2, h3 { color: #3d2009; }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg mb-4">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="{% url 'production:dashboard' %}">🥖 Bakery Manager</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="{% url 'production:dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'production:batch_list' %}"><i class="bi bi-list-check"></i> Production</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'inventory:product_list' %}"><i class="bi bi-box"></i> Products</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'inventory:ingredient_list' %}"><i class="bi bi-bag"></i> Ingredients</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'sales:sale_list' %}"><i class="bi bi-cart"></i> Sales</a></li>
+        <li class="nav-item"><a class="nav-link" href="/admin/"><i class="bi bi-gear"></i> Admin</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<div class="container pb-5">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+  {% block content %}{% endblock %}
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

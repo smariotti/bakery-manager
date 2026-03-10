@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}{{ batch.product.name }} Batch{% endblock %}
+{% block content %}
+<a href="{% url 'production:batch_list' %}" class="btn btn-sm btn-outline-secondary mb-3">&larr; All Batches</a>
+<div class="card mb-4">
+  <div class="card-body">
+    <h1 class="mb-1">{{ batch.product.name }}</h1>
+    <p class="text-muted">{{ batch.production_date }}</p>
+    <div class="row g-3">
+      <div class="col-sm-3"><strong>Status</strong><br><span class="badge bg-secondary fs-6">{{ batch.get_status_display }}</span></div>
+      <div class="col-sm-3"><strong>Planned</strong><br>{{ batch.quantity_planned }}</div>
+      <div class="col-sm-3"><strong>Produced</strong><br>{{ batch.quantity_produced }}</div>
+      <div class="col-sm-3"><strong>Available</strong><br><span class="text-success fw-bold">{{ batch.quantity_available }}</span></div>
+    </div>
+    {% if batch.notes %}<p class="mt-3 mb-0"><strong>Notes:</strong> {{ batch.notes }}</p>{% endif %}
+  </div>
+</div>
+<div class="card mb-4">
+  <div class="card-header bg-white fw-bold">Update Status</div>
+  <div class="card-body">
+    <form method="post" action="{% url 'production:batch_update_status' batch.pk %}">
+      {% csrf_token %}
+      <div class="row g-2 align-items-end">
+        <div class="col-sm-4">
+          <label class="form-label">New Status</label>
+          <select name="status" class="form-select">
+            {% for val, label in batch.Status.choices %}
+            <option value="{{ val }}" {% if val == batch.status %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-sm-4">
+          <label class="form-label">Quantity Produced</label>
+          <input type="number" name="quantity_produced" class="form-control" value="{{ batch.quantity_produced }}">
+        </div>
+        <div class="col-sm-4">
+          <button type="submit" class="btn btn-primary w-100">Update</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% if batch.status == 'ready' %}
+<a href="{% url 'sales:sale_create' batch.pk %}" class="btn btn-success"><i class="bi bi-cart-plus"></i> Record Sale</a>
+{% endif %}
+{% endblock %}
