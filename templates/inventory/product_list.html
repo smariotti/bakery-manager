@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Products{% endblock %}
+{% block title %}Products — Brickmaiden{% endblock %}
 {% block content %}
 
 <div class="page-header">
@@ -8,18 +8,81 @@
 </div>
 
 {% if products %}
-<div class="grid grid-2">
+<div style="display:flex;flex-direction:column;gap:16px">
   {% for p in products %}
   <div class="card" style="border-left:5px solid var(--amber)">
-    <div class="card-body">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--slate-lt);margin-bottom:6px">{{ p.get_category_display }}</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:6px">{{ p.name }}</div>
-      {% if p.description %}<p style="font-size:0.9rem;color:var(--slate);margin-bottom:10px">{{ p.description|truncatewords:12 }}</p>{% endif %}
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:800;color:var(--green)">${{ p.price }}</div>
+    <!-- Product header row — always visible -->
+    <div class="card-body" style="padding-bottom:{% if p.recipe %}12px{% else %}20px{% endif %}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--slate-lt);margin-bottom:4px">{{ p.get_category_display }}</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:4px">{{ p.name }}</div>
+          {% if p.description %}<p style="font-size:0.9rem;color:var(--slate);margin-bottom:6px">{{ p.description }}</p>{% endif %}
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:700;color:var(--green)">${{ p.price }}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+          {% if p.recipe %}
+          <button type="button"
+            class="btn btn-ghost btn-sm recipe-toggle"
+            data-target="recipe-{{ p.pk }}"
+            style="white-space:nowrap">
+            📜 Recipe <span class="toggle-arrow">▼</span>
+          </button>
+          {% else %}
+          <a href="{% url 'inventory:product_create' %}?recipe_hint={{ p.pk }}" class="btn btn-ghost btn-sm" style="color:var(--slate-lt);border-color:var(--slate-lt)">No recipe</a>
+          {% endif %}
+        </div>
+      </div>
     </div>
+
+    <!-- Collapsible recipe panel -->
+    {% if p.recipe %}
+    <div id="recipe-{{ p.pk }}" class="recipe-panel" style="display:none;border-top:2px solid var(--cream-dark)">
+      <div style="padding:16px 20px 4px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.1rem;color:var(--brown-mid)">{{ p.recipe.name }}</span>
+          {% if p.recipe.description %}
+          <span style="font-size:0.85rem;color:var(--slate-lt);margin-left:10px">{{ p.recipe.description }}</span>
+          {% endif %}
+        </div>
+        <a href="{% url 'recipes:recipe_detail' p.recipe.pk %}" class="btn btn-ghost btn-sm">Full Recipe →</a>
+      </div>
+
+      <div class="table-wrap" style="padding:0 0 16px">
+        <table>
+          <thead><tr>
+            <th>Ingredient</th>
+            <th>Amount</th>
+            <th>Baker's %</th>
+          </tr></thead>
+          <tbody>
+            {% for ri in p.recipe.recipe_ingredients.all %}
+            <tr>
+              <td class="fw">{{ ri.ingredient.name }}</td>
+              <td>
+                <span style="font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:700">{{ ri.amount|floatformat:"-3" }}</span>
+                <span style="color:var(--slate-lt);font-size:0.85rem"> {{ ri.get_unit_display }}</span>
+              </td>
+              <td>
+                {% if ri.bakers_percentage %}
+                  <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--brown-mid)">{{ ri.bakers_percentage|floatformat:1 }}%</span>
+                {% else %}—{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if p.recipe.notes %}
+      <div style="padding:0 20px 16px;font-size:0.88rem;color:var(--slate);white-space:pre-line;border-top:1px solid var(--cream-dark);padding-top:12px;margin:0 20px">{{ p.recipe.notes|truncatewords:40 }}</div>
+      {% endif %}
+    </div>
+    {% endif %}
   </div>
   {% endfor %}
 </div>
+
 {% else %}
 <div class="card">
   <div class="empty-state">
@@ -28,5 +91,17 @@
   </div>
 </div>
 {% endif %}
+
+<script>
+  document.querySelectorAll('.recipe-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const panel = document.getElementById(btn.dataset.target);
+      const arrow = btn.querySelector('.toggle-arrow');
+      const isOpen = panel.style.display !== 'none';
+      panel.style.display = isOpen ? 'none' : 'block';
+      arrow.textContent = isOpen ? '▼' : '▲';
+    });
+  });
+</script>
 
 {% endblock %}

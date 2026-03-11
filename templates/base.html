@@ -637,7 +637,8 @@
   <a class="nav-link" href="{% url 'production:batch_list' %}"><span class="nav-icon">📋</span> All Batches</a>
   <a class="nav-link" href="{% url 'production:batch_create' %}"><span class="nav-icon">➕</span> New Batch</a>
 
-  <div class="nav-section-label">Inventory</div>
+  <div class="nav-section-label">Recipes &amp; Inventory</div>
+  <a class="nav-link" href="{% url 'recipes:recipe_list' %}"><span class="nav-icon">📜</span> Recipes</a>
   <a class="nav-link" href="{% url 'inventory:product_list' %}"><span class="nav-icon">🍞</span> Products</a>
   <a class="nav-link" href="{% url 'inventory:product_create' %}"><span class="nav-icon">➕</span> Add Product</a>
   <a class="nav-link" href="{% url 'inventory:ingredient_list' %}"><span class="nav-icon">🌾</span> Ingredients</a>
@@ -664,9 +665,9 @@
       <span class="bnav-icon">➕</span>
       <span>New Batch</span>
     </a>
-    <a class="bottom-nav-item" href="{% url 'inventory:product_list' %}">
-      <span class="bnav-icon">🍞</span>
-      <span>Products</span>
+    <a class="bottom-nav-item" href="{% url 'recipes:recipe_list' %}">
+      <span class="bnav-icon">📜</span>
+      <span>Recipes</span>
     </a>
     <a class="bottom-nav-item" href="{% url 'sales:sale_list' %}">
       <span class="bnav-icon">🛒</span>

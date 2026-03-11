@@ -23,16 +23,24 @@ class Ingredient(models.Model):
 
 class Product(models.Model):
     class Category(models.TextChoices):
-        BREAD = 'bread', 'Bread'
+        BREAD  = 'bread',  'Bread'
         PASTRY = 'pastry', 'Pastry'
-        CAKE = 'cake', 'Cake'
+        CAKE   = 'cake',   'Cake'
         SAVORY = 'savory', 'Savory'
-        OTHER = 'other', 'Other'
+        OTHER  = 'other',  'Other'
 
-    name = models.CharField(max_length=100)
+    name     = models.CharField(max_length=100)
     category = models.CharField(max_length=20, choices=Category.choices, default=Category.OTHER)
     description = models.TextField(blank=True)
-    price = models.DecimalField(max_digits=8, decimal_places=2)
+    price    = models.DecimalField(max_digits=8, decimal_places=2)
+    # Lazy import via string ref to avoid circular import
+    recipe   = models.ForeignKey(
+        'recipes.Recipe',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='products',
+        help_text="The recipe used to make this product"
+    )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

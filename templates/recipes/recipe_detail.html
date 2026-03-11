@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}{{ recipe.name }} — Recipe{% endblock %}
+{% block content %}
+
+<a href="{% url 'recipes:recipe_list' %}" class="back-link">← All Recipes</a>
+
+<div class="page-header">
+  <div>
+    <div class="page-title">{{ recipe.name }}</div>
+    {% if recipe.description %}<div class="page-subtitle">{{ recipe.description }}</div>{% endif %}
+  </div>
+  <a href="{% url 'recipes:recipe_edit' recipe.pk %}" class="btn btn-ghost">✏️ Edit Recipe</a>
+</div>
+
+<!-- Ingredient table -->
+<div class="card" style="margin-bottom:24px">
+  <div class="card-header">
+    Ingredients
+    <span style="font-size:0.85rem;font-weight:500;color:var(--slate-lt)">Total: {{ recipe.total_weight_grams }}g</span>
+  </div>
+  <div class="card-body flush">
+    {% if recipe.recipe_ingredients.all %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>#</th>
+          <th>Ingredient</th>
+          <th>Amount</th>
+          <th>Baker's %</th>
+        </tr></thead>
+        <tbody>
+          {% for ri in recipe.recipe_ingredients.all %}
+          <tr>
+            <td style="color:var(--slate-lt);width:40px">{{ forloop.counter }}</td>
+            <td class="fw">{{ ri.ingredient.name }}</td>
+            <td>
+              <span style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700">{{ ri.amount|floatformat:"-3" }}</span>
+              <span style="color:var(--slate-lt);font-size:0.9rem"> {{ ri.get_unit_display }}</span>
+            </td>
+            <td>
+              {% if ri.bakers_percentage %}
+                <span style="font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:700;color:var(--brown-mid)">{{ ri.bakers_percentage|floatformat:1 }}%</span>
+              {% else %}
+                <span style="color:var(--slate-lt)">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding:32px">
+      <div class="empty-state-msg">No ingredients added yet</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Notes -->
+{% if recipe.notes %}
+<div class="card" style="margin-bottom:24px">
+  <div class="card-header">Method &amp; Notes</div>
+  <div class="card-body">
+    <p style="white-space:pre-line;line-height:1.7;color:var(--slate)">{{ recipe.notes }}</p>
+  </div>
+</div>
+{% endif %}
+
+<!-- Products using this recipe -->
+{% if recipe.products.exists %}
+<div class="section-title">Products Using This Recipe</div>
+<div class="grid grid-2">
+  {% for p in recipe.products.all %}
+  <div class="card" style="border-left:5px solid var(--amber)">
+    <div class="card-body">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--slate-lt);margin-bottom:4px">{{ p.get_category_display }}</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:800">{{ p.name }}</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:700;color:var(--green);margin-top:6px">${{ p.price }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

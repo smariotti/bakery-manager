@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'production',
     'inventory',
     'sales',
+    'recipes',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'

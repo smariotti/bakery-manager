@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Recipes — Brickmaiden{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="page-title">Recipes</div>
+  <a href="{% url 'recipes:recipe_create' %}" class="btn btn-primary"><span class="btn-icon">➕</span> New Recipe</a>
+</div>
+
+{% if recipes %}
+<div class="grid grid-2">
+  {% for r in recipes %}
+  <a href="{% url 'recipes:recipe_detail' r.pk %}" style="text-decoration:none;color:inherit">
+    <div class="card" style="border-left:5px solid var(--brown-mid);transition:box-shadow 0.15s" onmouseenter="this.style.boxShadow='var(--shadow-lg)'" onmouseleave="this.style.boxShadow='var(--shadow)'">
+      <div class="card-body">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:8px">{{ r.name }}</div>
+        {% if r.description %}<p style="font-size:0.9rem;color:var(--slate);margin-bottom:10px">{{ r.description|truncatewords:16 }}</p>{% endif %}
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:0.8rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--slate-lt)">
+            {{ r.recipe_ingredients.count }} ingredient{{ r.recipe_ingredients.count|pluralize }}
+          </span>
+          {% if r.total_weight_grams %}
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:0.8rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--slate-lt)">
+            {{ r.total_weight_grams }}g total
+          </span>
+          {% endif %}
+          {% if r.products.exists %}
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:0.8rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--amber)">
+            Used by {{ r.products.count }} product{{ r.products.count|pluralize }}
+          </span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">
+  <div class="empty-state">
+    <div class="empty-state-icon">📜</div>
+    <div class="empty-state-msg">No recipes yet — <a href="{% url 'recipes:recipe_create' %}">create the first one</a></div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

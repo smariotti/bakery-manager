@@ -4,21 +4,34 @@ from .models import Product, Ingredient
 
 
 def product_list(request):
-    products = Product.objects.filter(is_active=True)
+    products = Product.objects.filter(is_active=True).select_related('recipe').prefetch_related('recipe__recipe_ingredients__ingredient')
     return render(request, 'inventory/product_list.html', {'products': products})
 
 
 def product_create(request):
+    from recipes.models import Recipe
+    recipes = Recipe.objects.all()
     if request.method == 'POST':
+        recipe_id = request.POST.get('recipe') or None
+        recipe = None
+        if recipe_id:
+            try:
+                recipe = Recipe.objects.get(pk=recipe_id)
+            except Recipe.DoesNotExist:
+                pass
         Product.objects.create(
             name=request.POST['name'],
             category=request.POST['category'],
             description=request.POST.get('description', ''),
             price=request.POST['price'],
+            recipe=recipe,
         )
         messages.success(request, 'Product created.')
         return redirect('inventory:product_list')
-    return render(request, 'inventory/product_form.html', {'categories': Product.Category.choices})
+    return render(request, 'inventory/product_form.html', {
+        'categories': Product.Category.choices,
+        'recipes': recipes,
+    })
 
 
 def ingredient_list(request):

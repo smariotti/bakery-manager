@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block title %}{% if recipe %}Edit {{ recipe.name }}{% else %}New Recipe{% endif %} — Brickmaiden{% endblock %}
+{% block content %}
+
+<a href="{% url 'recipes:recipe_list' %}" class="back-link">← Recipes</a>
+<div class="page-title" style="margin-bottom:24px">
+  {% if recipe %}Edit Recipe{% else %}New Recipe{% endif %}
+</div>
+
+<form method="post" id="recipeForm">
+  {% csrf_token %}
+
+  <!-- Basic info -->
+  <div class="form-card" style="max-width:100%;margin-bottom:20px">
+    <div class="form-group">
+      <label class="form-label">Recipe Name</label>
+      <input type="text" name="name" class="form-control" required
+        value="{{ recipe.name|default:'' }}" placeholder="e.g. Country Sourdough">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Short Description</label>
+      <input type="text" name="description" class="form-control"
+        value="{{ recipe.description|default:'' }}" placeholder="Optional one-liner">
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Method &amp; Notes</label>
+      <textarea name="notes" class="form-control" rows="4"
+        placeholder="Mixing method, fermentation times, shaping tips…">{{ recipe.notes|default:'' }}</textarea>
+    </div>
+  </div>
+
+  <!-- Ingredients -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-header">
+      Ingredients
+      <button type="button" class="btn btn-amber btn-sm" id="addRowBtn">➕ Add Ingredient</button>
+    </div>
+    <div class="card-body flush">
+      <div class="table-wrap">
+        <table id="ingredientTable">
+          <thead><tr>
+            <th style="width:36px">#</th>
+            <th>Ingredient</th>
+            <th style="width:130px">Amount</th>
+            <th style="width:120px">Unit</th>
+            <th style="width:110px">Baker's %</th>
+            <th style="width:44px"></th>
+          </tr></thead>
+          <tbody id="ingredientRows">
+            {% if recipe %}
+              {% for ri in recipe.recipe_ingredients.all %}
+              <tr class="ingredient-row">
+                <td style="color:var(--slate-lt)" class="row-num">{{ forloop.counter }}</td>
+                <td>
+                  <input type="hidden" name="order" value="{{ ri.order }}">
+                  <select name="ingredient_id" class="form-control" required>
+                    <option value="">— select —</option>
+                    {% for ing in ingredients %}
+                    <option value="{{ ing.pk }}" {% if ing.pk == ri.ingredient.pk %}selected{% endif %}>{{ ing.name }}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td><input type="number" name="amount" class="form-control" step="0.001" min="0" required value="{{ ri.amount|floatformat:'-3' }}"></td>
+                <td>
+                  <select name="unit" class="form-control">
+                    {% for val, label in units %}
+                    <option value="{{ val }}" {% if val == ri.unit %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td><input type="number" name="bakers_percentage" class="form-control" step="0.01" min="0"
+                  value="{{ ri.bakers_percentage|default:'' }}" placeholder="—"></td>
+                <td><button type="button" class="btn btn-ghost btn-sm remove-row" style="min-height:40px;padding:0 10px">✕</button></td>
+              </tr>
+              {% endfor %}
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+      <div id="emptyMsg" class="empty-state" style="padding:32px;{% if recipe and recipe.recipe_ingredients.exists %}display:none{% endif %}">
+        <div class="empty-state-msg">No ingredients yet — click "Add Ingredient" above</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">
+      {% if recipe %}💾 Save Changes{% else %}✅ Create Recipe{% endif %}
+    </button>
+    {% if recipe %}
+    <a href="{% url 'recipes:recipe_detail' recipe.pk %}" class="btn btn-ghost">Cancel</a>
+    {% else %}
+    <a href="{% url 'recipes:recipe_list' %}" class="btn btn-ghost">Cancel</a>
+    {% endif %}
+  </div>
+</form>
+
+<script>
+  // Ingredient select HTML for new rows
+  const ingredientOptions = `
+    <option value="">— select —</option>
+    {% for ing in ingredients %}<option value="{{ ing.pk }}">{{ ing.name }}</option>{% endfor %}
+  `;
+  const unitOptions = `
+    {% for val, label in units %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+  `;
+
+  function updateRowNumbers() {
+    document.querySelectorAll('#ingredientRows .row-num').forEach((el, i) => {
+      el.textContent = i + 1;
+    });
+    const rows = document.querySelectorAll('#ingredientRows .ingredient-row');
+    document.getElementById('emptyMsg').style.display = rows.length === 0 ? 'block' : 'none';
+  }
+
+  function makeRow() {
+    const tr = document.createElement('tr');
+    tr.className = 'ingredient-row';
+    tr.innerHTML = `
+      <td style="color:var(--slate-lt)" class="row-num"></td>
+      <td>
+        <input type="hidden" name="order" value="0">
+        <select name="ingredient_id" class="form-control" required>
+          ${ingredientOptions}
+        </select>
+      </td>
+      <td><input type="number" name="amount" class="form-control" step="0.001" min="0" required placeholder="0"></td>
+      <td>
+        <select name="unit" class="form-control">${unitOptions}</select>
+      </td>
+      <td><input type="number" name="bakers_percentage" class="form-control" step="0.01" min="0" placeholder="—"></td>
+      <td><button type="button" class="btn btn-ghost btn-sm remove-row" style="min-height:40px;padding:0 10px">✕</button></td>
+    `;
+    tr.querySelector('.remove-row').addEventListener('click', () => {
+      tr.remove();
+      updateRowNumbers();
+    });
+    return tr;
+  }
+
+  document.getElementById('addRowBtn').addEventListener('click', () => {
+    const tbody = document.getElementById('ingredientRows');
+    const row = makeRow();
+    tbody.appendChild(row);
+    updateRowNumbers();
+    row.querySelector('select').focus();
+  });
+
+  // Wire up existing remove buttons
+  document.querySelectorAll('.remove-row').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.closest('tr').remove();
+      updateRowNumbers();
+    });
+  });
+
+  updateRowNumbers();
+</script>
+{% endblock %}

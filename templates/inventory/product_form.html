@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Add Product{% endblock %}
+{% block title %}Add Product — Brickmaiden{% endblock %}
 {% block content %}
 
 <a href="{% url 'inventory:product_list' %}" class="back-link">← Products</a>
@@ -22,6 +22,16 @@
       <div class="form-group">
         <label class="form-label">Price</label>
         <input type="number" name="price" class="form-control" step="0.01" required placeholder="0.00">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Recipe <span style="font-weight:400;color:var(--slate-lt)">(optional)</span></label>
+      <select name="recipe" class="form-control">
+        <option value="">— No recipe assigned —</option>
+        {% for r in recipes %}<option value="{{ r.pk }}">{{ r.name }}</option>{% endfor %}
+      </select>
+      <div style="margin-top:8px;font-size:0.85rem;color:var(--slate-lt)">
+        Don't have the recipe yet? <a href="{% url 'recipes:recipe_create' %}">Create one first →</a>
       </div>
     </div>
     <div class="form-group">
