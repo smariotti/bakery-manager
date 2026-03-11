@@ -1,26 +1,46 @@
 {% extends 'base.html' %}
-{% block title %}Record Sale{% endblock %}
+{% block title %}Record Sale — {{ batch.product.name }}{% endblock %}
 {% block content %}
-<h1 class="mb-4">Record Sale — {{ batch.product.name }}</h1>
-<div class="card" style="max-width:500px">
+
+<a href="{% url 'production:dashboard' %}" class="back-link">← Dashboard</a>
+<div class="page-title" style="margin-bottom:4px">Record Sale</div>
+<div class="page-subtitle" style="margin-bottom:24px">{{ batch.product.name }}</div>
+
+<div class="card" style="margin-bottom:20px;border-top:5px solid var(--green)">
   <div class="card-body">
-    <p><strong>Available:</strong> <span class="text-success fw-bold">{{ batch.quantity_available }}</span></p>
-    <form method="post">
-      {% csrf_token %}
-      <div class="mb-3">
-        <label class="form-label">Quantity Sold</label>
-        <input type="number" name="quantity_sold" class="form-control" required min="1" max="{{ batch.quantity_available }}">
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Sales Channel</label>
-        <select name="channel" class="form-select">
-          {% for val, label in channels %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
-        </select>
-      </div>
-      <div class="mb-3"><label class="form-label">Notes</label><textarea name="notes" class="form-control" rows="2"></textarea></div>
-      <button type="submit" class="btn btn-success">Record Sale</button>
-      <a href="{% url 'production:dashboard' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
-    </form>
+    <div class="meta-label">Currently Available</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:3.5rem;font-weight:800;color:var(--green);line-height:1">
+      {{ batch.quantity_available }}
+    </div>
+    <div style="font-size:0.85rem;color:var(--slate-lt);margin-top:4px">units</div>
   </div>
 </div>
+
+<div class="form-card">
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label class="form-label">Quantity Sold</label>
+      <input type="number" name="quantity_sold" class="form-control" required min="1" max="{{ batch.quantity_available }}"
+        style="font-size:1.5rem;font-weight:700;text-align:center" placeholder="0">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Sales Channel</label>
+      <select name="channel" class="form-control">
+        {% for val, label in channels %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea name="notes" class="form-control" placeholder="Optional note…"></textarea>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-success" style="flex:1;font-size:1.1rem">
+        <span class="btn-icon">✅</span> Confirm Sale
+      </button>
+      <a href="{% url 'production:dashboard' %}" class="btn btn-ghost">Cancel</a>
+    </div>
+  </form>
+</div>
+
 {% endblock %}

@@ -1,25 +1,39 @@
 {% extends 'base.html' %}
-{% block title %}Sales{% endblock %}
+{% block title %}Sales Log{% endblock %}
 {% block content %}
-<h1 class="mb-4">Sales Log</h1>
+
+<div class="page-header">
+  <div class="page-title">Sales Log</div>
+</div>
+
 <div class="card">
-  <div class="card-body p-0">
-    <table class="table table-hover mb-0">
-      <thead class="table-light"><tr><th>Date/Time</th><th>Product</th><th>Qty</th><th>Channel</th><th>Value</th></tr></thead>
-      <tbody>
-        {% for s in sales %}
-        <tr>
-          <td>{{ s.sale_date|date:"d M Y H:i" }}</td>
-          <td class="fw-semibold">{{ s.batch.product.name }}</td>
-          <td>{{ s.quantity_sold }}</td>
-          <td>{{ s.get_channel_display }}</td>
-          <td>${{ s.total_value }}</td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="5" class="text-muted text-center py-4">No sales recorded yet.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div class="card-body flush">
+    {% if sales %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Date &amp; Time</th><th>Product</th><th>Qty</th><th>Channel</th><th>Value</th>
+        </tr></thead>
+        <tbody>
+          {% for s in sales %}
+          <tr>
+            <td style="color:var(--slate-lt);white-space:nowrap">{{ s.sale_date|date:"d M H:i" }}</td>
+            <td class="fw">{{ s.batch.product.name }}</td>
+            <td>{{ s.quantity_sold }}</td>
+            <td><span class="badge badge-ok">{{ s.get_channel_display }}</span></td>
+            <td style="font-weight:700;color:var(--green)">${{ s.total_value }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">🛒</div>
+      <div class="empty-state-msg">No sales recorded yet</div>
+    </div>
+    {% endif %}
   </div>
 </div>
+
 {% endblock %}

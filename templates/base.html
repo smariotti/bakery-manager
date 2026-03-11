@@ -2,52 +2,618 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>{% block title %}Bakery Manager{% endblock %}</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    body { background: #fdf8f0; }
-    .navbar { background: #5c3317 !important; }
-    .navbar-brand, .nav-link { color: #fff !important; }
-    .nav-link:hover { color: #f5c97a !important; }
-    .card { border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 12px; }
-    .badge-status { font-size: 0.85rem; padding: 0.4em 0.8em; border-radius: 20px; }
-    .btn-primary { background: #5c3317; border-color: #5c3317; }
-    .btn-primary:hover { background: #7a4522; border-color: #7a4522; }
-    h1, h2, h3 { color: #3d2009; }
+    :root {
+      --cream:     #f5f0e8;
+      --cream-dark:#ede6d6;
+      --brown:     #3d2009;
+      --brown-mid: #6b3a1f;
+      --brown-lt:  #a0622a;
+      --amber:     #e8a020;
+      --amber-lt:  #f5c84a;
+      --green:     #2d6a4f;
+      --green-lt:  #52b788;
+      --red:       #c1121f;
+      --red-lt:    #e63946;
+      --slate:     #4a4a4a;
+      --slate-lt:  #7a7a7a;
+      --white:     #ffffff;
+
+      --touch-min: 56px;
+      --radius:    10px;
+      --radius-lg: 16px;
+      --shadow:    0 2px 12px rgba(61,32,9,0.10);
+      --shadow-lg: 0 6px 28px rgba(61,32,9,0.16);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { font-size: 18px; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Barlow', sans-serif;
+      background: var(--cream);
+      color: var(--brown);
+      min-height: 100vh;
+    }
+
+    /* ── TOPBAR ─────────────────────────────────────── */
+    .topbar {
+      background: var(--brown);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 3px 16px rgba(0,0,0,0.30);
+    }
+
+    .topbar-brand {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 1.55rem;
+      color: var(--amber-lt);
+      letter-spacing: 0.04em;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .topbar-spacer { flex: 1; }
+
+    .topbar-menu-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      color: var(--cream);
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      min-width: var(--touch-min);
+      min-height: var(--touch-min);
+      align-items: center;
+      justify-content: center;
+    }
+    .topbar-menu-btn span {
+      display: block;
+      width: 26px;
+      height: 3px;
+      background: currentColor;
+      border-radius: 2px;
+      transition: transform 0.25s, opacity 0.25s;
+    }
+    .topbar-menu-btn.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .topbar-menu-btn.open span:nth-child(2) { opacity: 0; }
+    .topbar-menu-btn.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+    /* ── SLIDE-OUT NAV ──────────────────────────────── */
+    .nav-drawer {
+      position: fixed;
+      top: 64px;
+      right: -280px;
+      width: 280px;
+      height: calc(100vh - 64px);
+      background: var(--brown);
+      z-index: 99;
+      transition: right 0.28s cubic-bezier(0.4,0,0.2,1);
+      overflow-y: auto;
+      padding: 12px 0 32px;
+    }
+    .nav-drawer.open { right: 0; }
+
+    .nav-overlay {
+      display: none;
+      position: fixed;
+      inset: 64px 0 0 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 98;
+    }
+    .nav-overlay.open { display: block; }
+
+    .nav-section-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--brown-lt);
+      padding: 20px 24px 6px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0 24px;
+      min-height: var(--touch-min);
+      color: var(--cream);
+      text-decoration: none;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 600;
+      font-size: 1.1rem;
+      letter-spacing: 0.03em;
+      border-left: 4px solid transparent;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .nav-link:hover, .nav-link.active {
+      background: rgba(255,255,255,0.08);
+      border-left-color: var(--amber);
+      color: var(--amber-lt);
+    }
+    .nav-link .nav-icon {
+      font-size: 1.3rem;
+      width: 26px;
+      text-align: center;
+    }
+
+    /* ── PAGE WRAPPER ───────────────────────────────── */
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 80px;
+    }
+
+    /* ── PAGE HEADER ────────────────────────────────── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .page-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--brown);
+      letter-spacing: 0.02em;
+    }
+    .page-subtitle {
+      font-size: 0.9rem;
+      color: var(--slate-lt);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* ── ALERTS ─────────────────────────────────────── */
+    .alert {
+      padding: 14px 18px;
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .alert-success { background: #d4edda; color: #155724; border-left: 5px solid var(--green); }
+    .alert-error, .alert-danger { background: #f8d7da; color: #721c24; border-left: 5px solid var(--red); }
+    .alert-info { background: #fff3cd; color: #856404; border-left: 5px solid var(--amber); }
+
+    /* ── CARDS ───────────────────────────────────────── */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 2px solid var(--cream-dark);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--brown-mid);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-body { padding: 20px; }
+    .card-body.flush { padding: 0; }
+
+    /* ── GRID ─────────────────────────────────────────── */
+    .grid { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+    .grid-stats { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+
+    /* ── STAT TILES ──────────────────────────────────── */
+    .stat-tile {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: 20px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .stat-tile-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--slate-lt);
+    }
+    .stat-tile-value {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--brown);
+    }
+    .stat-tile-value.green { color: var(--green); }
+    .stat-tile-value.amber { color: var(--amber); }
+    .stat-tile-value.red   { color: var(--red); }
+
+    /* ── PRODUCT CARDS (ready to sell) ──────────────── */
+    .product-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-top: 5px solid var(--green);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .product-card:active { transform: scale(0.98); }
+    .product-card-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: 0.02em;
+    }
+    .product-card-qty {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--green);
+    }
+    .product-card-unit {
+      font-size: 0.85rem;
+      color: var(--slate-lt);
+      margin-top: -6px;
+      font-weight: 500;
+    }
+
+    /* ── TABLE ─────────────────────────────────────── */
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    thead th {
+      background: var(--cream-dark);
+      padding: 12px 16px;
+      text-align: left;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--brown-mid);
+      white-space: nowrap;
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--cream-dark);
+      transition: background 0.1s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:active { background: var(--cream); }
+    td {
+      padding: 14px 16px;
+      vertical-align: middle;
+    }
+    td.fw { font-weight: 600; }
+
+    /* ── BADGES ─────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .badge-planned   { background: #e9ecef; color: #495057; }
+    .badge-mixing    { background: #fff3cd; color: #856404; }
+    .badge-shaping   { background: #ffe8cc; color: #7d3c00; }
+    .badge-proofing  { background: #d1ecf1; color: #0c5460; }
+    .badge-baking    { background: #f8d7da; color: #721c24; }
+    .badge-cooling   { background: #cce5ff; color: #004085; }
+    .badge-ready     { background: #d4edda; color: #155724; }
+    .badge-sold_out  { background: #e2e3e5; color: #383d41; }
+    .badge-ok        { background: #d4edda; color: #155724; }
+    .badge-low       { background: #f8d7da; color: #721c24; }
+
+    /* ── BUTTONS ─────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: var(--touch-min);
+      padding: 0 22px;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: filter 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary   { background: var(--brown-mid); color: var(--white); }
+    .btn-primary:hover { filter: brightness(1.15); }
+    .btn-success   { background: var(--green); color: var(--white); }
+    .btn-success:hover { filter: brightness(1.1); }
+    .btn-amber     { background: var(--amber); color: var(--brown); }
+    .btn-amber:hover { filter: brightness(1.1); }
+    .btn-ghost     { background: transparent; color: var(--brown-mid); border: 2px solid var(--brown-mid); }
+    .btn-ghost:hover { background: var(--brown-mid); color: var(--white); }
+    .btn-sm        { min-height: 42px; padding: 0 14px; font-size: 0.85rem; }
+    .btn-full      { width: 100%; }
+    .btn-icon      { font-size: 1.1rem; }
+
+    /* ── FORMS ───────────────────────────────────────── */
+    .form-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: 28px 24px;
+      max-width: 620px;
+    }
+    .form-group { margin-bottom: 20px; }
+    .form-label {
+      display: block;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--brown-mid);
+      margin-bottom: 8px;
+    }
+    .form-control {
+      width: 100%;
+      min-height: var(--touch-min);
+      padding: 0 16px;
+      border: 2px solid var(--cream-dark);
+      border-radius: var(--radius);
+      font-family: 'Barlow', sans-serif;
+      font-size: 1rem;
+      color: var(--brown);
+      background: var(--cream);
+      transition: border-color 0.15s;
+      appearance: none;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--brown-mid);
+      background: var(--white);
+    }
+    textarea.form-control {
+      min-height: 100px;
+      padding: 12px 16px;
+      resize: vertical;
+    }
+    select.form-control {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b3a1f' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 44px;
+    }
+    .form-row { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
+    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+
+    /* ── STATUS UPDATE BLOCK ─────────────────────────── */
+    .status-bar {
+      background: var(--cream-dark);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-top: 20px;
+    }
+    .status-steps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .status-step-btn {
+      min-height: 48px;
+      padding: 0 16px;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      background: var(--white);
+      color: var(--slate);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .status-step-btn.active {
+      background: var(--brown);
+      color: var(--amber-lt);
+      border-color: var(--brown);
+    }
+    .status-step-btn:hover:not(.active) {
+      border-color: var(--brown-mid);
+      color: var(--brown-mid);
+    }
+
+    /* ── DETAIL META ─────────────────────────────────── */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .meta-item {}
+    .meta-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--slate-lt);
+      margin-bottom: 4px;
+    }
+    .meta-value {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--brown);
+    }
+    .meta-value.green { color: var(--green); }
+
+    /* ── BACK LINK ───────────────────────────────────── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--brown-mid);
+      text-decoration: none;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      opacity: 0.8;
+    }
+    .back-link:hover { opacity: 1; }
+
+    /* ── EMPTY STATE ─────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 56px 24px;
+      color: var(--slate-lt);
+    }
+    .empty-state-icon { font-size: 3rem; margin-bottom: 12px; }
+    .empty-state-msg {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── DIVIDER ─────────────────────────────────────── */
+    .divider {
+      border: none;
+      border-top: 2px solid var(--cream-dark);
+      margin: 24px 0;
+    }
+
+    /* ── SECTION TITLE ───────────────────────────────── */
+    .section-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--brown-mid);
+      margin-bottom: 14px;
+    }
+
+    /* ── RESPONSIVE ──────────────────────────────────── */
+    @media (max-width: 600px) {
+      html { font-size: 16px; }
+      .page { padding: 16px 12px 80px; }
+      .page-title { font-size: 1.6rem; }
+      .form-card { padding: 20px 16px; }
+    }
   </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg mb-4">
-  <div class="container">
-    <a class="navbar-brand fw-bold" href="{% url 'production:dashboard' %}">🥖 Bakery Manager</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="nav">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="{% url 'production:dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'production:batch_list' %}"><i class="bi bi-list-check"></i> Production</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'inventory:product_list' %}"><i class="bi bi-box"></i> Products</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'inventory:ingredient_list' %}"><i class="bi bi-bag"></i> Ingredients</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'sales:sale_list' %}"><i class="bi bi-cart"></i> Sales</a></li>
-        <li class="nav-item"><a class="nav-link" href="/admin/"><i class="bi bi-gear"></i> Admin</a></li>
-      </ul>
-    </div>
-  </div>
+
+<header class="topbar">
+  <a class="topbar-brand" href="{% url 'production:dashboard' %}">🥖 Bakery</a>
+  <div class="topbar-spacer"></div>
+  <button class="topbar-menu-btn" id="menuBtn" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="nav-drawer" id="navDrawer">
+  <div class="nav-section-label">Production</div>
+  <a class="nav-link" href="{% url 'production:dashboard' %}"><span class="nav-icon">📊</span> Dashboard</a>
+  <a class="nav-link" href="{% url 'production:batch_list' %}"><span class="nav-icon">📋</span> All Batches</a>
+  <a class="nav-link" href="{% url 'production:batch_create' %}"><span class="nav-icon">➕</span> New Batch</a>
+
+  <div class="nav-section-label">Inventory</div>
+  <a class="nav-link" href="{% url 'inventory:product_list' %}"><span class="nav-icon">🍞</span> Products</a>
+  <a class="nav-link" href="{% url 'inventory:product_create' %}"><span class="nav-icon">➕</span> Add Product</a>
+  <a class="nav-link" href="{% url 'inventory:ingredient_list' %}"><span class="nav-icon">🌾</span> Ingredients</a>
+
+  <div class="nav-section-label">Sales</div>
+  <a class="nav-link" href="{% url 'sales:sale_list' %}"><span class="nav-icon">🛒</span> Sales Log</a>
+
+  <div class="nav-section-label">System</div>
+  <a class="nav-link" href="/admin/"><span class="nav-icon">⚙️</span> Admin</a>
 </nav>
-<div class="container pb-5">
+
+<main class="page">
   {% if messages %}
     {% for message in messages %}
-      <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+      <div class="alert alert-{{ message.tags|default:'info' }}">
+        {% if message.tags == 'success' %}✅{% elif message.tags == 'error' or message.tags == 'danger' %}❌{% else %}ℹ️{% endif %}
         {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
     {% endfor %}
   {% endif %}
+
   {% block content %}{% endblock %}
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</main>
+
+<script>
+  const btn = document.getElementById('menuBtn');
+  const drawer = document.getElementById('navDrawer');
+  const overlay = document.getElementById('navOverlay');
+
+  function toggleMenu(open) {
+    btn.classList.toggle('open', open);
+    drawer.classList.toggle('open', open);
+    overlay.classList.toggle('open', open);
+  }
+
+  btn.addEventListener('click', () => toggleMenu(!drawer.classList.contains('open')));
+  overlay.addEventListener('click', () => toggleMenu(false));
+
+  // Close on nav link tap
+  drawer.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', () => toggleMenu(false)));
+</script>
 </body>
 </html>

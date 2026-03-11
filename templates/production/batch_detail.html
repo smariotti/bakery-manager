@@ -1,46 +1,74 @@
 {% extends 'base.html' %}
-{% block title %}{{ batch.product.name }} Batch{% endblock %}
+{% block title %}{{ batch.product.name }} — Batch Detail{% endblock %}
 {% block content %}
-<a href="{% url 'production:batch_list' %}" class="btn btn-sm btn-outline-secondary mb-3">&larr; All Batches</a>
-<div class="card mb-4">
+
+<a href="{% url 'production:batch_list' %}" class="back-link">← All Batches</a>
+
+<div class="page-header">
+  <div>
+    <div class="page-title">{{ batch.product.name }}</div>
+    <div class="page-subtitle">{{ batch.production_date|date:"l, j F Y" }}</div>
+  </div>
+  <span class="badge badge-{{ batch.status }}" style="font-size:1rem;padding:8px 16px">{{ batch.get_status_display }}</span>
+</div>
+
+<div class="card" style="margin-bottom:20px">
   <div class="card-body">
-    <h1 class="mb-1">{{ batch.product.name }}</h1>
-    <p class="text-muted">{{ batch.production_date }}</p>
-    <div class="row g-3">
-      <div class="col-sm-3"><strong>Status</strong><br><span class="badge bg-secondary fs-6">{{ batch.get_status_display }}</span></div>
-      <div class="col-sm-3"><strong>Planned</strong><br>{{ batch.quantity_planned }}</div>
-      <div class="col-sm-3"><strong>Produced</strong><br>{{ batch.quantity_produced }}</div>
-      <div class="col-sm-3"><strong>Available</strong><br><span class="text-success fw-bold">{{ batch.quantity_available }}</span></div>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="meta-label">Planned</div>
+        <div class="meta-value">{{ batch.quantity_planned }}</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Produced</div>
+        <div class="meta-value">{{ batch.quantity_produced }}</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Available</div>
+        <div class="meta-value green">{{ batch.quantity_available }}</div>
+      </div>
+      {% if batch.assigned_to %}
+      <div class="meta-item">
+        <div class="meta-label">Assigned To</div>
+        <div class="meta-value" style="font-size:1.1rem">{{ batch.assigned_to }}</div>
+      </div>
+      {% endif %}
     </div>
-    {% if batch.notes %}<p class="mt-3 mb-0"><strong>Notes:</strong> {{ batch.notes }}</p>{% endif %}
+    {% if batch.notes %}
+    <hr class="divider">
+    <p style="color:var(--slate);font-size:0.95rem"><strong>Notes:</strong> {{ batch.notes }}</p>
+    {% endif %}
   </div>
 </div>
-<div class="card mb-4">
-  <div class="card-header bg-white fw-bold">Update Status</div>
+
+<!-- Status update -->
+<div class="card" style="margin-bottom:20px">
+  <div class="card-header">Update Status</div>
   <div class="card-body">
     <form method="post" action="{% url 'production:batch_update_status' batch.pk %}">
       {% csrf_token %}
-      <div class="row g-2 align-items-end">
-        <div class="col-sm-4">
-          <label class="form-label">New Status</label>
-          <select name="status" class="form-select">
-            {% for val, label in batch.Status.choices %}
-            <option value="{{ val }}" {% if val == batch.status %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="col-sm-4">
-          <label class="form-label">Quantity Produced</label>
-          <input type="number" name="quantity_produced" class="form-control" value="{{ batch.quantity_produced }}">
-        </div>
-        <div class="col-sm-4">
-          <button type="submit" class="btn btn-primary w-100">Update</button>
-        </div>
+      <div class="status-steps">
+        {% for val, label in batch.Status.choices %}
+        <button type="submit" name="status" value="{{ val }}"
+          class="status-step-btn {% if val == batch.status %}active{% endif %}">
+          {{ label }}
+        </button>
+        {% endfor %}
       </div>
+      {% if batch.status != 'ready' %}
+      <div style="margin-top:16px;max-width:260px">
+        <label class="form-label">Quantity Produced</label>
+        <input type="number" name="quantity_produced" class="form-control" value="{{ batch.quantity_produced }}" min="0">
+      </div>
+      {% endif %}
     </form>
   </div>
 </div>
+
 {% if batch.status == 'ready' %}
-<a href="{% url 'sales:sale_create' batch.pk %}" class="btn btn-success"><i class="bi bi-cart-plus"></i> Record Sale</a>
+<a href="{% url 'sales:sale_create' batch.pk %}" class="btn btn-success" style="font-size:1.1rem;min-height:60px;padding:0 32px">
+  <span class="btn-icon">🛒</span> Record a Sale
+</a>
 {% endif %}
+
 {% endblock %}

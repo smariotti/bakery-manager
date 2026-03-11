@@ -1,24 +1,32 @@
 {% extends 'base.html' %}
 {% block title %}Products{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h1>Products</h1>
-  <a href="{% url 'inventory:product_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Product</a>
+
+<div class="page-header">
+  <div class="page-title">Products</div>
+  <a href="{% url 'inventory:product_create' %}" class="btn btn-primary"><span class="btn-icon">➕</span> Add Product</a>
 </div>
-<div class="row g-3">
+
+{% if products %}
+<div class="grid grid-2">
   {% for p in products %}
-  <div class="col-sm-6 col-md-4">
-    <div class="card h-100">
-      <div class="card-body">
-        <span class="badge bg-light text-dark mb-2">{{ p.get_category_display }}</span>
-        <h5 class="card-title">{{ p.name }}</h5>
-        <p class="card-text text-muted">{{ p.description|truncatewords:15 }}</p>
-        <p class="fw-bold text-success">${{ p.price }}</p>
-      </div>
+  <div class="card" style="border-left:5px solid var(--amber)">
+    <div class="card-body">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--slate-lt);margin-bottom:6px">{{ p.get_category_display }}</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:6px">{{ p.name }}</div>
+      {% if p.description %}<p style="font-size:0.9rem;color:var(--slate);margin-bottom:10px">{{ p.description|truncatewords:12 }}</p>{% endif %}
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:800;color:var(--green)">${{ p.price }}</div>
     </div>
   </div>
-  {% empty %}
-  <p class="text-muted">No products yet. <a href="{% url 'inventory:product_create' %}">Add one.</a></p>
   {% endfor %}
 </div>
+{% else %}
+<div class="card">
+  <div class="empty-state">
+    <div class="empty-state-icon">🍞</div>
+    <div class="empty-state-msg">No products yet — <a href="{% url 'inventory:product_create' %}">add the first one</a></div>
+  </div>
+</div>
+{% endif %}
+
 {% endblock %}

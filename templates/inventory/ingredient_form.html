@@ -1,19 +1,40 @@
 {% extends 'base.html' %}
-{% block title %}New Ingredient{% endblock %}
+{% block title %}Add Ingredient{% endblock %}
 {% block content %}
-<h1 class="mb-4">Add Ingredient</h1>
-<div class="card" style="max-width:500px">
-  <div class="card-body">
-    <form method="post">
-      {% csrf_token %}
-      <div class="mb-3"><label class="form-label">Name</label><input type="text" name="name" class="form-control" required></div>
-      <div class="mb-3"><label class="form-label">Unit (e.g. kg, litres)</label><input type="text" name="unit" class="form-control" required></div>
-      <div class="mb-3"><label class="form-label">Current Stock</label><input type="number" name="stock_quantity" class="form-control" step="0.01" value="0"></div>
-      <div class="mb-3"><label class="form-label">Reorder Level</label><input type="number" name="reorder_level" class="form-control" step="0.01" value="0"></div>
-      <div class="mb-3"><label class="form-label">Notes</label><textarea name="notes" class="form-control" rows="2"></textarea></div>
-      <button type="submit" class="btn btn-primary">Save</button>
-      <a href="{% url 'inventory:ingredient_list' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
-    </form>
-  </div>
+
+<a href="{% url 'inventory:ingredient_list' %}" class="back-link">← Ingredients</a>
+<div class="page-title" style="margin-bottom:24px">Add Ingredient</div>
+
+<div class="form-card">
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label class="form-label">Name</label>
+      <input type="text" name="name" class="form-control" required placeholder="e.g. Strong White Flour">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Unit</label>
+        <input type="text" name="unit" class="form-control" required placeholder="kg, g, litres…">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Current Stock</label>
+        <input type="number" name="stock_quantity" class="form-control" step="0.01" value="0">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Reorder Level</label>
+      <input type="number" name="reorder_level" class="form-control" step="0.01" value="0">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea name="notes" class="form-control" placeholder="Supplier info, storage notes…"></textarea>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Save Ingredient</button>
+      <a href="{% url 'inventory:ingredient_list' %}" class="btn btn-ghost">Cancel</a>
+    </div>
+  </form>
 </div>
+
 {% endblock %}

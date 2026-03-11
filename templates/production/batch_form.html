@@ -1,33 +1,39 @@
 {% extends 'base.html' %}
-{% block title %}New Production Batch{% endblock %}
+{% block title %}New Batch{% endblock %}
 {% block content %}
-<h1 class="mb-4">New Production Batch</h1>
-<div class="card" style="max-width:600px">
-  <div class="card-body">
-    <form method="post">
-      {% csrf_token %}
-      <div class="mb-3">
-        <label class="form-label">Product</label>
-        <select name="product" class="form-select" required>
-          <option value="">-- Select product --</option>
-          {% for p in products %}<option value="{{ p.pk }}">{{ p.name }}</option>{% endfor %}
-        </select>
-      </div>
-      <div class="mb-3">
+
+<a href="{% url 'production:batch_list' %}" class="back-link">← All Batches</a>
+<div class="page-title" style="margin-bottom:24px">New Production Batch</div>
+
+<div class="form-card">
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label class="form-label">Product</label>
+      <select name="product" class="form-control" required>
+        <option value="">— Select product —</option>
+        {% for p in products %}<option value="{{ p.pk }}">{{ p.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
         <label class="form-label">Quantity Planned</label>
-        <input type="number" name="quantity_planned" class="form-control" required min="1">
+        <input type="number" name="quantity_planned" class="form-control" required min="1" placeholder="0">
       </div>
-      <div class="mb-3">
+      <div class="form-group">
         <label class="form-label">Production Date</label>
         <input type="date" name="production_date" class="form-control" required>
       </div>
-      <div class="mb-3">
-        <label class="form-label">Notes</label>
-        <textarea name="notes" class="form-control" rows="3"></textarea>
-      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea name="notes" class="form-control" placeholder="Any special instructions..."></textarea>
+    </div>
+    <div class="form-actions">
       <button type="submit" class="btn btn-primary">Create Batch</button>
-      <a href="{% url 'production:batch_list' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
-    </form>
-  </div>
+      <a href="{% url 'production:batch_list' %}" class="btn btn-ghost">Cancel</a>
+    </div>
+  </form>
 </div>
+
 {% endblock %}
