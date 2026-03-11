@@ -1,0 +1,41 @@
+{
+  "name": "Brickmaiden",
+  "short_name": "Brickmaiden",
+  "description": "Bakery production and sales tracker",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f0e8",
+  "theme_color": "#3d2009",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/",
+      "description": "Today's production overview"
+    },
+    {
+      "name": "New Batch",
+      "url": "/batches/new/",
+      "description": "Create a new production batch"
+    },
+    {
+      "name": "Sales Log",
+      "url": "/sales/",
+      "description": "View and record sales"
+    }
+  ]
+}
